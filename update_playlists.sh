@@ -8,6 +8,16 @@ ROOT_DIRECTORY=/opt/musicbot
 MUSIC_DIRECTORY=/home/musicbot/music
 PLAYLIST_DIRECTORY=/home/musicbot/playlist
 
+track_fixname() {
+    old_path=$1
+    new_path="${file//[^a-zA-Z0-9-._\ \/]/}"
+    
+    if [ "$old_path" != "$new_path" ]; then
+        mv "$old_path" "$new_path"
+    fi
+    echo "$new_path"
+}
+
 playlist_fixname() {
     fixed_name=$1
     # We map videos downloaded from YT to playlist name youtube
@@ -41,10 +51,13 @@ playlist_create() {
     echo -e "Adding files to playlist: $fixed_name"
     for file in $MUSIC_DIRECTORY/$1/* ; do
         if [ -f "$file" ]; then
-            file_path=$(basename "$file")
+            #echo "$file";
+            fixed_file_name=$(track_fixname "$file");
+            #echo "$fixed_file_name"
+            file_path=$(basename "$fixed_file_name")
             file_extension="${file_path##*.}"
             file_name="${file_path%.*}"
-            echo "../music/${fixed_name}/${file_name}.${file_extension}" >> "$PLAYLIST_DIRECTORY/$fixed_name"
+            echo "../music/${1}/${file_name}.${file_extension}" >> "$PLAYLIST_DIRECTORY/$fixed_name"
         fi
     done
 }
